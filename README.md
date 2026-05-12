@@ -1,1 +1,0 @@
-# inventario-de-banco
