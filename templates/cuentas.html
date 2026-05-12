@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cuentas</title>
+</head>
+<body>
+
+<h1>Cuentas de {{ cliente.nombre }}</h1>
+
+<form method="POST" action="/agregar_cuenta/{{ cliente.id_cliente }}">
+    <input name="numero" placeholder="Número">
+    <input name="saldo" placeholder="Saldo">
+    <button>Agregar Cuenta</button>
+</form>
+
+<h2>Lista</h2>
+<ul>
+{% for c in cliente.cuentas %}
+    <li>{{ c.numero }} - ${{ c.saldo }}</li>
+{% endfor %}
+</ul>
+
+<h2>Depositar</h2>
+<form method="POST" action="/depositar/{{ cliente.id_cliente }}">
+    <input name="numero" placeholder="Cuenta">
+    <input name="monto" placeholder="Monto">
+    <button>Depositar</button>
+</form>
+
+<a href="/">Volver</a>
+
+</body>
+</html>

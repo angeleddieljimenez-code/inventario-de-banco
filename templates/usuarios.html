@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Usuarios</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>Usuarios</h1>
+
+    <nav>
+        <a href="/">Inicio</a>
+    </nav>
+
+</header>
+
+<section class="form-section">
+
+    <h2>Agregar Usuario</h2>
+
+    <form action="/agregar" method="POST">
+
+        <input
+        type="text"
+        name="nombre"
+        placeholder="Nombre"
+        required>
+
+        <input
+        type="email"
+        name="correo"
+        placeholder="Correo"
+        required>
+
+        <button type="submit">
+            Guardar
+        </button>
+
+    </form>
+
+</section>
+
+<section class="usuarios">
+
+    <h2>Lista de Usuarios</h2>
+
+    {% for usuario in usuarios %}
+
+    <div class="usuario-card">
+
+        <h3>{{ usuario[1] }}</h3>
+
+        <p>{{ usuario[2] }}</p>
+
+        <a href="/eliminar/{{ usuario[0] }}">
+
+            <button>
+                Eliminar
+            </button>
+
+        </a>
+
+        <a href="/editar/{{ usuario[0] }}">
+
+    <button>
+        Editar
+    </button>
+
+</a>
+
+    </div>
+
+    {% endfor %}
+
+</section>
+
+</body>
+</html>

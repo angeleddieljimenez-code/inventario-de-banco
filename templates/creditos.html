@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Créditos</title>
+</head>
+<body>
+
+<h1>Créditos de {{ cliente.nombre }}</h1>
+
+<form method="POST" action="/agregar_credito/{{ cliente.id_cliente }}">
+    <input name="id" placeholder="ID Crédito">
+    <input name="monto" placeholder="Monto">
+    <button>Agregar Crédito</button>
+</form>
+
+<h2>Lista</h2>
+<ul>
+{% for c in cliente.creditos %}
+    <li>{{ c.id_credito }} - Deuda: ${{ c.deuda }}</li>
+{% endfor %}
+</ul>
+
+<h2>Pagar</h2>
+<form method="POST" action="/pagar/{{ cliente.id_cliente }}">
+    <input name="id" placeholder="Crédito">
+    <input name="cantidad" placeholder="Cantidad">
+    <button>Pagar</button>
+</form>
+
+<a href="/">Volver</a>
+
+</body>
+</html>
