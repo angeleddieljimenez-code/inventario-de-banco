@@ -5,6 +5,9 @@
 
     <meta charset="UTF-8">
 
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
     <title>Dashboard</title>
 
     <link rel="stylesheet"
@@ -14,21 +17,83 @@
 
 <body>
 
-    <header>
+<header>
 
-        <h1>Dashboard Bancario</h1>
+    <h1>Dashboard Bancario</h1>
 
-    </header>
+    <nav>
 
-    <section class="hero">
+        <a href="/">
+            Inicio
+        </a>
 
-        <h2>Bienvenido al Panel</h2>
+        <a href="/usuarios">
+            Usuarios
+        </a>
 
-        <p>
-            Ya estás dentro del sistema.
-        </p>
+        <a href="/inventario">
+            Inventario
+        </a>
 
-    </section>
+        <a href="/reportes">
+            Reportes
+        </a>
+
+        <a href="/logout">
+            Cerrar sesión
+        </a>
+
+    </nav>
+
+</header>
+
+<section class="dashboard">
+
+    <h2>
+        Bienvenido al Panel Administrativo
+    </h2>
+
+    <div class="dashboard-cards">
+
+        <div class="dashboard-card">
+
+            <h3>
+                Usuarios Registrados
+            </h3>
+
+            <p>
+                {{ total_usuarios }}
+            </p>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <h3>
+                Estado del Sistema
+            </h3>
+
+            <p>
+                Activo
+            </p>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <h3>
+                Seguridad
+            </h3>
+
+            <p>
+                Protegido
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
 
 </body>
 

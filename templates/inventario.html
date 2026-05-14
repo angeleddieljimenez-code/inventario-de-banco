@@ -5,6 +5,9 @@
 
     <meta charset="UTF-8">
 
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
     <title>Inventario</title>
 
     <link rel="stylesheet"
@@ -19,56 +22,79 @@
     <h1>Inventario Bancario</h1>
 
     <nav>
-        <a href="/">Inicio</a>
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/logout">
+            Cerrar sesión
+        </a>
+
     </nav>
 
 </header>
 
-<section class="hero">
+<section class="form-section">
 
-    <h2>Inventario</h2>
+    <h2>
+        Agregar Producto
+    </h2>
 
-    <p>
-        Aquí irá el control de recursos.
-    </p>
+    <form action="/agregar_producto" method="POST">
+
+        <input
+        type="text"
+        name="producto"
+        placeholder="Producto"
+        autocomplete="off"
+        required>
+
+        <input
+        type="text"
+        name="cantidad"
+        placeholder="Cantidad"
+        autocomplete="off"
+        required>
+
+        <button type="submit">
+            Guardar
+        </button>
+
+    </form>
 
 </section>
 
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="es">
+<section class="usuarios">
 
-<head>
+    <h2>
+        Productos Registrados
+    </h2>
 
-    <meta charset="UTF-8">
+    {% for producto in productos %}
 
-    <title>Inventario</title>
+        <div class="usuario-card">
 
-    <link rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}">
+            <h3>
+                {{ producto[1] }}
+            </h3>
 
-</head>
+            <p>
+                Cantidad:
+                {{ producto[2] }}
+            </p>
 
-<body>
+            <a href="/eliminar_producto/{{ producto[0] }}">
 
-<header>
+                <button>
+                    Eliminar
+                </button>
 
-    <h1>Inventario Bancario</h1>
+            </a>
 
-    <nav>
-        <a href="/">Inicio</a>
-    </nav>
+        </div>
 
-</header>
-
-<section class="hero">
-
-    <h2>Control Bancario</h2>
-
-    <p>
-        Página de inventario funcionando.
-    </p>
+    {% endfor %}
 
 </section>
 

@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import sqlite3
 
 app = Flask(__name__)
+app.secret_key = 'supersecretkey'
 
 # =========================
 # CREAR BASE DE DATOS
@@ -20,10 +21,46 @@ def crear_bd():
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS admins(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario TEXT NOT NULL,
+            password TEXT NOT NULL
+        )
+    ''')
+    # TABLA ADMINS
+
+    cursor.execute(
+        "SELECT * FROM admins WHERE usuario = ?",
+        ('admin',)
+    )
+
+    admin = cursor.fetchone()
+
+    if not admin:
+
+        cursor.execute(
+            '''
+            INSERT INTO admins(usuario, password)
+            VALUES(?, ?)
+            ''',
+            ('admin', 'FIME2026')
+        )
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS inventario(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            producto TEXT NOT NULL,
+            cantidad INTEGER NOT NULL
+        )
+    ''')
+
     conexion.commit()
     conexion.close()
 
 crear_bd()
+
+
 
 # =========================
 # INICIO
@@ -49,8 +86,35 @@ def inicio():
 # LOGIN
 # =========================
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    if request.method == 'POST':
+
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        conexion = sqlite3.connect('database.db')
+        cursor = conexion.cursor()
+
+        cursor.execute(
+            '''
+            SELECT * FROM admins
+            WHERE usuario = ? AND password = ?
+            ''',
+            (usuario, password)
+        )
+
+        admin = cursor.fetchone()
+
+        conexion.close()
+
+        if admin:
+
+            session['usuario'] = usuario
+
+            return redirect('/dashboard')
+
     return render_template('login.html')
 
 # =========================
@@ -59,11 +123,30 @@ def login():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+
+    if 'usuario' not in session:
+        return redirect('/login')
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM usuarios"
+    )
+
+    total_usuarios = cursor.fetchone()[0]
+
+    conexion.close()
+
+    return render_template(
+        'dashboard.html',
+        total_usuarios=total_usuarios
+    )
 
 # =========================
 # USUARIOS
 # =========================
+
 
 @app.route('/usuarios')
 def usuarios():
@@ -87,7 +170,22 @@ def usuarios():
 
 @app.route('/inventario')
 def inventario():
-    return render_template('inventario.html')
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT * FROM inventario"
+    )
+
+    productos = cursor.fetchall()
+
+    conexion.close()
+
+    return render_template(
+        'inventario.html',
+        productos=productos
+    )
 
 # =========================
 # REPORTES
@@ -198,3 +296,60 @@ def actualizar(id):
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
+
+    # =========================
+# AGREGAR PRODUCTO
+# =========================
+
+@app.route('/agregar_producto', methods=['POST'])
+def agregar_producto():
+
+    try:
+
+        producto = request.form.get('producto')
+        cantidad = request.form.get('cantidad')
+
+        # VALIDAR VACÍOS
+
+        if not producto or not cantidad:
+            return redirect('/inventario')
+
+        conexion = sqlite3.connect('database.db')
+        cursor = conexion.cursor()
+
+        cursor.execute(
+            '''
+            INSERT INTO inventario(producto, cantidad)
+            VALUES(?, ?)
+            ''',
+            (producto, cantidad)
+        )
+
+        conexion.commit()
+        conexion.close()
+
+        return redirect('/inventario')
+
+    except Exception as e:
+
+        return f"ERROR: {e}"
+
+# =========================
+# ELIMINAR PRODUCTO
+# =========================
+
+@app.route('/eliminar_producto/<int:id>')
+def eliminar_producto(id):
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "DELETE FROM inventario WHERE id = ?",
+        (id,)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return redirect('/inventario')

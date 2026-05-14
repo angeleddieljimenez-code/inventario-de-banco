@@ -14,31 +14,35 @@
 
 <body>
 
-    <div class="login-container">
+<div class="login-container">
 
-        <div class="login-box">
+    <div class="login-box">
 
-            <h1>Iniciar Sesión</h1>
+        <h1>Iniciar Sesión</h1>
 
-            <form>
+        <form method="POST">
 
-                <input
-                type="text"
-                placeholder="Usuario">
+            <input
+            type="text"
+            name="usuario"
+            placeholder="Usuario"
+            required>
 
-                <input
-                type="password"
-                placeholder="Contraseña">
+            <input
+            type="password"
+            name="password"
+            placeholder="Contraseña"
+            required>
 
-                <button>
-                    Entrar
-                </button>
+            <button type="submit">
+                Entrar
+            </button>
 
-            </form>
-
-        </div>
+        </form>
 
     </div>
+
+</div>
 
 </body>
 
