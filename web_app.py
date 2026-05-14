@@ -9,26 +9,26 @@ app.secret_key = 'supersecretkey'
 # =========================
 
 def crear_bd():
-
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
 
+    # TABLA CUENTAS
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS usuarios(
+        CREATE TABLE IF NOT EXISTS cuentas(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            correo TEXT NOT NULL
+            cliente TEXT NOT NULL,
+            saldo REAL NOT NULL
         )
     ''')
 
+    # TABLA ADMINS
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS admins(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT NOT NULL,
+            usuario TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL
         )
     ''')
-    # TABLA ADMINS
 
     cursor.execute(
         "SELECT * FROM admins WHERE usuario = ?",
@@ -38,7 +38,6 @@ def crear_bd():
     admin = cursor.fetchone()
 
     if not admin:
-
         cursor.execute(
             '''
             INSERT INTO admins(usuario, password)
@@ -52,6 +51,14 @@ def crear_bd():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             producto TEXT NOT NULL,
             cantidad INTEGER NOT NULL
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS usuarios(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            correo TEXT NOT NULL
         )
     ''')
 
@@ -291,48 +298,38 @@ def actualizar(id):
     return redirect('/usuarios')
 
 # =========================
-# EJECUTAR SERVIDOR
-# =========================
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5001)
-
-    # =========================
 # AGREGAR PRODUCTO
 # =========================
 
 @app.route('/agregar_producto', methods=['POST'])
 def agregar_producto():
 
-    try:
+    producto = request.form['producto']
+    cantidad = request.form['cantidad']
 
-        producto = request.form.get('producto')
-        cantidad = request.form.get('cantidad')
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
 
-        # VALIDAR VACÍOS
+    cursor.execute(
+        '''
+        INSERT INTO inventario(producto, cantidad)
+        VALUES(?, ?)
+        ''',
+        (producto, cantidad)
+    )
 
-        if not producto or not cantidad:
-            return redirect('/inventario')
+    conexion.commit()
+    conexion.close()
 
-        conexion = sqlite3.connect('database.db')
-        cursor = conexion.cursor()
+    return redirect('/inventario')
 
-        cursor.execute(
-            '''
-            INSERT INTO inventario(producto, cantidad)
-            VALUES(?, ?)
-            ''',
-            (producto, cantidad)
-        )
+# =========================
+# EJECUTAR SERVIDOR
+# =========================
 
-        conexion.commit()
-        conexion.close()
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)
 
-        return redirect('/inventario')
-
-    except Exception as e:
-
-        return f"ERROR: {e}"
 
 # =========================
 # ELIMINAR PRODUCTO
@@ -353,3 +350,132 @@ def eliminar_producto(id):
     conexion.close()
 
     return redirect('/inventario')
+
+# =========================
+# CUENTAS
+# =========================
+
+@app.route('/cuentas')
+def cuentas():
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT * FROM cuentas"
+    )
+
+    cuentas = cursor.fetchall()
+
+    conexion.close()
+
+    return render_template(
+        'cuentas.html',
+        cuentas=cuentas
+    )
+
+# =========================
+# CREAR CUENTA
+# =========================
+
+@app.route('/crear_cuenta', methods=['POST'])
+def crear_cuenta():
+
+    cliente = request.form['cliente']
+    saldo = request.form['saldo']
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        '''
+        INSERT INTO cuentas(cliente, saldo)
+        VALUES(?, ?)
+        ''',
+        (cliente, saldo)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return redirect('/cuentas')
+
+# =========================
+# DEPOSITAR
+# =========================
+
+@app.route('/depositar/<int:id>', methods=['POST'])
+def depositar(id):
+
+    cantidad = float(request.form['cantidad'])
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT saldo FROM cuentas WHERE id = ?",
+        (id,)
+    )
+
+    saldo_actual = cursor.fetchone()[0]
+
+    nuevo_saldo = saldo_actual + cantidad
+
+    cursor.execute(
+        '''
+        UPDATE cuentas
+        SET saldo = ?
+        WHERE id = ?
+        ''',
+        (nuevo_saldo, id)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return redirect('/cuentas')
+
+# =========================
+# RETIRAR
+# =========================
+
+@app.route('/retirar/<int:id>', methods=['POST'])
+def retirar(id):
+
+    cantidad = float(request.form['cantidad'])
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT saldo FROM cuentas WHERE id = ?",
+        (id,)
+    )
+
+    saldo_actual = cursor.fetchone()[0]
+
+    if saldo_actual >= cantidad:
+
+        nuevo_saldo = saldo_actual - cantidad
+
+        cursor.execute(
+            '''
+            UPDATE cuentas
+            SET saldo = ?
+            WHERE id = ?
+            ''',
+            (nuevo_saldo, id)
+        )
+
+        conexion.commit()
+
+    conexion.close()
+
+    return redirect('/cuentas')
+
+# =========================
+# EJECUTAR SERVIDOR
+# =========================
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5001, debug=True)

@@ -1,33 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
+
 <head>
-    <title>Cuentas</title>
+
+    <meta charset="UTF-8">
+
+    <title>Cuentas Bancarias</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 <body>
 
-<h1>Cuentas de {{ cliente.nombre }}</h1>
+<header>
 
-<form method="POST" action="/agregar_cuenta/{{ cliente.id_cliente }}">
-    <input name="numero" placeholder="Número">
-    <input name="saldo" placeholder="Saldo">
-    <button>Agregar Cuenta</button>
-</form>
+    <h1>Cuentas Bancarias</h1>
 
-<h2>Lista</h2>
-<ul>
-{% for c in cliente.cuentas %}
-    <li>{{ c.numero }} - ${{ c.saldo }}</li>
-{% endfor %}
-</ul>
+</header>
 
-<h2>Depositar</h2>
-<form method="POST" action="/depositar/{{ cliente.id_cliente }}">
-    <input name="numero" placeholder="Cuenta">
-    <input name="monto" placeholder="Monto">
-    <button>Depositar</button>
-</form>
+<section class="form-section">
 
-<a href="/">Volver</a>
+    <h2>Crear Cuenta</h2>
+
+    <form action="/crear_cuenta" method="POST">
+
+        <input
+        type="text"
+        name="cliente"
+        placeholder="Cliente"
+        required>
+
+        <input
+        type="number"
+        name="saldo"
+        placeholder="Saldo Inicial"
+        required>
+
+        <button type="submit">
+            Crear Cuenta
+        </button>
+
+    </form>
+
+</section>
+
+<section class="usuarios">
+
+    <h2>Cuentas Registradas</h2>
+
+    {% for cuenta in cuentas %}
+
+        <div class="usuario-card">
+
+            <h3>{{ cuenta[1] }}</h3>
+
+            <p>Saldo: ${{ cuenta[2] }}</p>
+
+        </div>
+
+    {% endfor %}
+
+</section>
 
 </body>
+
 </html>
