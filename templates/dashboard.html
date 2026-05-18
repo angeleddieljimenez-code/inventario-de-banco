@@ -8,7 +8,9 @@
     <meta name="viewport"
     content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard</title>
+    <title>
+        Dashboard Bancario
+    </title>
 
     <link rel="stylesheet"
     href="{{ url_for('static', filename='style.css') }}">
@@ -19,11 +21,13 @@
 
 <header>
 
-    <h1>Dashboard Bancario</h1>
+    <h1>
+        Dashboard Bancario
+    </h1>
 
     <nav>
 
-        <a href="/">
+        <a href="/dashboard">
             Inicio
         </a>
 
@@ -39,125 +43,8 @@
             Cuentas
         </a>
 
-        <a href="/logout">
-            Cerrar sesión
-        </a>
-
-    </nav>
-
-</header>
-
-<section class="form-section">
-
-    <h2>
-        Crear Cuenta
-    </h2>
-
-    <form action="/crear_cuenta" method="POST">
-
-        <input
-        type="text"
-        name="cliente"
-        placeholder="Cliente"
-        required>
-
-        <input
-        type="number"
-        name="saldo"
-        placeholder="Saldo Inicial"
-        required>
-
-        <button type="submit">
-            Crear Cuenta
-        </button>
-
-    </form>
-
-</section>
-
-<section class="usuarios">
-
-    <h2>
-        Cuentas Registradas
-    </h2>
-
-    <title>Cuentas Bancarias</title>
-
-    <link rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}">
-
-</head>
-
-<body>
-
-<header>
-
-    <h1>Cuentas Bancarias</h1>
-
-    <nav>
-
-    <a href="/dashboard">
-        Dashboard
-    </a>
-
-    <a href="/usuarios">
-        Usuarios
-    </a>
-
-    <a href="/inventario">
-        Inventario
-    </a>
-
-    <a href="/cuentas">
-        Cuentas
-    </a>
-
-    <a href="/logout">
-        Cerrar sesión
-    </a>
-
-</nav>
-
-</header>
-
-<section class="form-section">
-
-    <h2>
-        Crear Cuenta
-    </h2>
-
-    <form action="/crear_cuenta" method="POST">
-
-        <input
-        type="text"
-        name="cliente"
-        placeholder="Cliente"
-        required>
-
-        <input
-        type="number"
-        name="saldo"
-        placeholder="Saldo Inicial"
-        required>
-
-        <button type="submit">
-            Crear Cuenta
-        </button>
-
-    </form>
-
-</section>
-
-<section class="usuarios">
-
-    <h2>
-        Cuentas Registradas
-    </h2>
-
-
-
-        <a href="/reportes">
-            Reportes
+        <a href="/movimientos">
+            Movimientos
         </a>
 
         <a href="/logout">
@@ -171,7 +58,7 @@
 <section class="dashboard">
 
     <h2>
-        Bienvenido al Panel Administrativo
+        Bienvenido al Sistema Bancario
     </h2>
 
     <div class="dashboard-cards">
@@ -179,7 +66,7 @@
         <div class="dashboard-card">
 
             <h3>
-                Usuarios Registrados
+                Usuarios
             </h3>
 
             <p>
@@ -191,11 +78,11 @@
         <div class="dashboard-card">
 
             <h3>
-                Estado del Sistema
+                Cuentas
             </h3>
 
             <p>
-                Activo
+                {{ total_cuentas }}
             </p>
 
         </div>
@@ -203,11 +90,23 @@
         <div class="dashboard-card">
 
             <h3>
-                Seguridad
+                Dinero Total
             </h3>
 
             <p>
-                Protegido
+                ${{ total_dinero }}
+            </p>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <h3>
+                Movimientos
+            </h3>
+
+            <p>
+                {{ total_movimientos }}
             </p>
 
         </div>

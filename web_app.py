@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, redirect, session
+# web_app.py COMPLETO
+
+from flask import Flask, render_template, request, redirect, session # pyright: ignore[reportMissingImports]
 import sqlite3
+from datetime import datetime
+import random
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -9,15 +13,17 @@ app.secret_key = 'supersecretkey'
 # =========================
 
 def crear_bd():
+
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
 
-    # TABLA CUENTAS
+    # TABLA USUARIOS
+
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS cuentas(
+        CREATE TABLE IF NOT EXISTS usuarios(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            cliente TEXT NOT NULL,
-            saldo REAL NOT NULL
+            nombre TEXT NOT NULL,
+            correo TEXT NOT NULL
         )
     ''')
 
@@ -25,7 +31,7 @@ def crear_bd():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS admins(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT NOT NULL UNIQUE,
+            usuario TEXT NOT NULL,
             password TEXT NOT NULL
         )
     ''')
@@ -43,9 +49,10 @@ def crear_bd():
             INSERT INTO admins(usuario, password)
             VALUES(?, ?)
             ''',
-            ('admin', 'FIME2026')
+            ('admin', 'FIME2027')
         )
 
+    # TABLA INVENTARIO
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS inventario(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,11 +61,24 @@ def crear_bd():
         )
     ''')
 
+    # TABLA CUENTAS
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS usuarios(
+        CREATE TABLE IF NOT EXISTS cuentas(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL,
-            correo TEXT NOT NULL
+            cliente TEXT NOT NULL,
+            saldo REAL NOT NULL,
+            tarjeta TEXT NOT NULL
+        )
+    ''')
+
+    # TABLA MOVIMIENTOS
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS movimientos(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            cuenta TEXT NOT NULL,
+            tipo TEXT NOT NULL,
+            cantidad REAL NOT NULL,
+            fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
 
@@ -67,27 +87,14 @@ def crear_bd():
 
 crear_bd()
 
-
-
 # =========================
-# INICIO
+# PAGINA PRINCIPAL
 # =========================
 
 @app.route('/')
 def inicio():
 
-    conexion = sqlite3.connect('database.db')
-    cursor = conexion.cursor()
-
-    cursor.execute("SELECT * FROM usuarios")
-    usuarios = cursor.fetchall()
-
-    conexion.close()
-
-    return render_template(
-        'index.html',
-        usuarios=usuarios
-    )
+    return render_template('index.html')
 
 # =========================
 # LOGIN
@@ -96,10 +103,10 @@ def inicio():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
-    if request.method == 'POST':
+    if flask.flask.request.method == 'POST':
 
-        usuario = request.form['usuario']
-        password = request.form['password']
+        usuario = flask.flask.request.form['usuario']
+        password = flask.flask.request.form['password']
 
         conexion = sqlite3.connect('database.db')
         cursor = conexion.cursor()
@@ -118,11 +125,22 @@ def login():
 
         if admin:
 
-            session['usuario'] = usuario
+            flask.flask.session['usuario'] = usuario
 
-            return redirect('/dashboard')
+            return flask.Flask.flask.redirect('/dashboard')
 
-    return render_template('login.html')
+    return flask.flask.render_template('login.html')
+
+# =========================
+# LOGOUT
+# =========================
+
+@app.route('/logout')
+def logout():
+
+    flask.flask.session.pop('usuario', None)
+
+    return flask.flask.redirect('/login')
 
 # =========================
 # DASHBOARD
@@ -131,11 +149,13 @@ def login():
 @app.route('/dashboard')
 def dashboard():
 
-    if 'usuario' not in session:
-        return redirect('/login')
+    if 'usuario' not in flask.session: # pyright: ignore[reportUndefinedVariable]
+        return flask.redirect('/login') # type: ignore
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
+
+    # USUARIOS
 
     cursor.execute(
         "SELECT COUNT(*) FROM usuarios"
@@ -143,17 +163,46 @@ def dashboard():
 
     total_usuarios = cursor.fetchone()[0]
 
-    conexion.close()
+    # CUENTAS
 
-    return render_template(
-        'dashboard.html',
-        total_usuarios=total_usuarios
+    cursor.execute(
+        "SELECT COUNT(*) FROM cuentas"
     )
 
+    total_cuentas = cursor.fetchone()[0]
+
+    # DINERO TOTAL
+
+    cursor.execute(
+        "SELECT SUM(saldo) FROM cuentas"
+    )
+
+    total_dinero = cursor.fetchone()[0]
+
+    if total_dinero is None:
+        total_dinero = 0
+
+    # MOVIMIENTOS
+
+    cursor.execute(
+        "SELECT COUNT(*) FROM movimientos"
+    )
+
+    total_movimientos = cursor.fetchone()[0]
+
+    conexion.close()
+
+    return flask.render_template( # type: ignore
+        'dashboard.html',
+        total_usuarios=total_usuarios,
+        total_cuentas=total_cuentas,
+        total_dinero=total_dinero,
+        total_movimientos=total_movimientos
+    )
+    
 # =========================
 # USUARIOS
 # =========================
-
 
 @app.route('/usuarios')
 def usuarios():
@@ -162,14 +211,58 @@ def usuarios():
     cursor = conexion.cursor()
 
     cursor.execute("SELECT * FROM usuarios")
-    lista_usuarios = cursor.fetchall()
+
+    usuarios = cursor.fetchall()
 
     conexion.close()
 
-    return render_template(
+    return flask.flask.render_template(
         'usuarios.html',
-        usuarios=lista_usuarios
+        usuarios=usuarios
     )
+
+# =========================
+# ELIMINAR USUARIO
+# =========================
+
+@app.route('/eliminar_usuario/<int:id>')
+def eliminar_usuario(id):
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "DELETE FROM usuarios WHERE id = ?",
+        (id,)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return flask.flask.redirect('/usuarios')
+
+# =========================
+# AGREGAR USUARIO
+# =========================
+
+@app.route('/agregar', methods=['POST'])
+def agregar():
+
+    nombre = flask.flask.request.form['nombre']
+    correo = flask.flask.request.form['correo']
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "INSERT INTO usuarios(nombre, correo) VALUES(?, ?)",
+        (nombre, correo)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return flask.flask.redirect('/usuarios')
 
 # =========================
 # INVENTARIO
@@ -189,113 +282,10 @@ def inventario():
 
     conexion.close()
 
-    return render_template(
+    return flask.flask.render_template(
         'inventario.html',
         productos=productos
     )
-
-# =========================
-# REPORTES
-# =========================
-
-@app.route('/reportes')
-def reportes():
-    return render_template('reportes.html')
-
-# =========================
-# AGREGAR USUARIO
-# =========================
-
-@app.route('/agregar', methods=['POST'])
-def agregar():
-
-    nombre = request.form['nombre']
-    correo = request.form['correo']
-
-    conexion = sqlite3.connect('database.db')
-    cursor = conexion.cursor()
-
-    cursor.execute(
-        "INSERT INTO usuarios(nombre, correo) VALUES(?, ?)",
-        (nombre, correo)
-    )
-
-    conexion.commit()
-    conexion.close()
-
-    return redirect('/usuarios')
-
-# =========================
-# ELIMINAR USUARIO
-# =========================
-
-@app.route('/eliminar/<int:id>')
-def eliminar(id):
-
-    conexion = sqlite3.connect('database.db')
-    cursor = conexion.cursor()
-
-    cursor.execute(
-        "DELETE FROM usuarios WHERE id = ?",
-        (id,)
-    )
-
-    conexion.commit()
-    conexion.close()
-
-    return redirect('/usuarios')
-
-# =========================
-# EDITAR USUARIO
-# =========================
-
-@app.route('/editar/<int:id>')
-def editar(id):
-
-    conexion = sqlite3.connect('database.db')
-    cursor = conexion.cursor()
-
-    cursor.execute(
-        "SELECT * FROM usuarios WHERE id = ?",
-        (id,)
-    )
-
-    usuario = cursor.fetchone()
-
-    conexion.close()
-
-    return render_template(
-        'editar.html',
-        usuario=usuario
-    )
-
-
-# =========================
-# ACTUALIZAR USUARIO
-# =========================
-
-@app.route('/actualizar/<int:id>', methods=['POST'])
-def actualizar(id):
-
-    nombre = request.form['nombre']
-    correo = request.form['correo']
-
-    conexion = sqlite3.connect('database.db')
-    cursor = conexion.cursor()
-
-    cursor.execute(
-        '''
-        UPDATE usuarios
-        SET nombre = ?, correo = ?
-        WHERE id = ?
-        ''',
-        (nombre, correo, id)
-    )
-
-    conexion.commit()
-    conexion.close()
-
-    return redirect('/usuarios')
 
 # =========================
 # AGREGAR PRODUCTO
@@ -304,8 +294,8 @@ def actualizar(id):
 @app.route('/agregar_producto', methods=['POST'])
 def agregar_producto():
 
-    producto = request.form['producto']
-    cantidad = request.form['cantidad']
+    producto = flask.flask.request.form['producto']
+    cantidad = flask.flask.request.form['cantidad']
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -321,15 +311,7 @@ def agregar_producto():
     conexion.commit()
     conexion.close()
 
-    return redirect('/inventario')
-
-# =========================
-# EJECUTAR SERVIDOR
-# =========================
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5001)
-
+    return flask.flask.redirect('/inventario')
 
 # =========================
 # ELIMINAR PRODUCTO
@@ -349,7 +331,7 @@ def eliminar_producto(id):
     conexion.commit()
     conexion.close()
 
-    return redirect('/inventario')
+    return flask.flask.redirect('/inventario')
 
 # =========================
 # CUENTAS
@@ -358,18 +340,32 @@ def eliminar_producto(id):
 @app.route('/cuentas')
 def cuentas():
 
+    buscar = flask.flask.request.args.get('buscar')
+
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
 
-    cursor.execute(
-        "SELECT * FROM cuentas"
-    )
+    if buscar:
+
+        cursor.execute(
+            '''
+            SELECT * FROM cuentas
+            WHERE cliente LIKE ?
+            ''',
+            ('%' + buscar + '%',)
+        )
+
+    else:
+
+        cursor.execute(
+            "SELECT * FROM cuentas"
+        )
 
     cuentas = cursor.fetchall()
 
     conexion.close()
 
-    return render_template(
+    return flask.flask.render_template(
         'cuentas.html',
         cuentas=cuentas
     )
@@ -381,24 +377,31 @@ def cuentas():
 @app.route('/crear_cuenta', methods=['POST'])
 def crear_cuenta():
 
-    cliente = request.form['cliente']
-    saldo = request.form['saldo']
+    cliente = flask.flask.request.form['cliente']
+    saldo = flask.flask.request.form['saldo']
+
+    tarjeta = str(
+        random.randint(
+            1000000000000000,
+            9999999999999999
+        )
+    )
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
 
     cursor.execute(
         '''
-        INSERT INTO cuentas(cliente, saldo)
-        VALUES(?, ?)
+        INSERT INTO cuentas(cliente, saldo, tarjeta)
+        VALUES(?, ?, ?)
         ''',
-        (cliente, saldo)
+        (cliente, saldo, tarjeta)
     )
 
     conexion.commit()
     conexion.close()
 
-    return redirect('/cuentas')
+    return flask.flask.redirect('/cuentas')
 
 # =========================
 # DEPOSITAR
@@ -407,7 +410,7 @@ def crear_cuenta():
 @app.route('/depositar/<int:id>', methods=['POST'])
 def depositar(id):
 
-    cantidad = float(request.form['cantidad'])
+    cantidad = float(flask.flask.request.form['cantidad'])
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -430,10 +433,22 @@ def depositar(id):
         (nuevo_saldo, id)
     )
 
+    # GUARDAR MOVIMIENTO
+
+    cursor.execute(
+        '''
+        INSERT INTO movimientos(cuenta, tipo, cantidad)
+        VALUES(?, ?, ?)
+        ''',
+        (id, 'Deposito', cantidad)
+    )
+
     conexion.commit()
     conexion.close()
 
-    return redirect('/cuentas')
+    return flask.flask.redirect(
+    f'/recibo/Deposito/{cantidad}'
+)
 
 # =========================
 # RETIRAR
@@ -442,7 +457,7 @@ def depositar(id):
 @app.route('/retirar/<int:id>', methods=['POST'])
 def retirar(id):
 
-    cantidad = float(request.form['cantidad'])
+    cantidad = float(flask.flask.request.form['cantidad'])
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -467,11 +482,164 @@ def retirar(id):
             (nuevo_saldo, id)
         )
 
+        # GUARDAR MOVIMIENTO
+
+        cursor.execute(
+            '''
+            INSERT INTO movimientos(cuenta, tipo, cantidad)
+            VALUES(?, ?, ?)
+            ''',
+            (id, 'Retiro', cantidad)
+        )
+
         conexion.commit()
 
     conexion.close()
 
-    return redirect('/cuentas')
+    return flask.flask.redirect(
+    f'/recibo/Retiro/{cantidad}'
+)
+# =========================
+# TRANSFERENCIAS
+# =========================
+
+@app.route('/transferir', methods=['POST'])
+def transferir():
+
+    origen = flask.flask.request.form['origen']
+    destino = flask.flask.request.form['destino']
+    cantidad = float(flask.flask.request.form['cantidad'])
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT saldo FROM cuentas WHERE id = ?",
+        (origen,)
+    )
+
+    saldo_origen = cursor.fetchone()[0]
+
+    if saldo_origen >= cantidad:
+
+        nuevo_origen = saldo_origen - cantidad
+
+        cursor.execute(
+            '''
+            UPDATE cuentas
+            SET saldo = ?
+            WHERE id = ?
+            ''',
+            (nuevo_origen, origen)
+        )
+
+        cursor.execute(
+            "SELECT saldo FROM cuentas WHERE id = ?",
+            (destino,)
+        )
+
+        saldo_destino = cursor.fetchone()[0]
+
+        nuevo_destino = saldo_destino + cantidad
+
+        cursor.execute(
+            '''
+            UPDATE cuentas
+            SET saldo = ?
+            WHERE id = ?
+            ''',
+            (nuevo_destino, destino)
+        )
+
+        # MOVIMIENTOS
+
+        cursor.execute(
+            '''
+            INSERT INTO movimientos(cuenta, tipo, cantidad)
+            VALUES(?, ?, ?)
+            ''',
+            (origen, 'Transferencia Enviada', cantidad)
+        )
+
+        cursor.execute(
+            '''
+            INSERT INTO movimientos(cuenta, tipo, cantidad)
+            VALUES(?, ?, ?)
+            ''',
+            (destino, 'Transferencia Recibida', cantidad)
+        )
+
+        conexion.commit()
+
+    conexion.close()
+
+    return flask.flask.redirect(
+    f'/recibo/Transferencia/{cantidad}'
+)
+
+# =========================
+# MOVIMIENTOS
+# =========================
+
+@app.route('/movimientos')
+def movimientos():
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        '''
+        SELECT * FROM movimientos
+        ORDER BY fecha DESC
+        '''
+    )
+
+    movimientos = cursor.fetchall()
+
+    conexion.close()
+
+    return render_template(
+        'movimientos.html',
+        movimientos=movimientos
+    )
+
+# =========================
+# ELIMINAR CUENTA
+# =========================
+
+@app.route('/eliminar_cuenta/<int:id>')
+def eliminar_cuenta(id):
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "DELETE FROM cuentas WHERE id = ?",
+        (id,)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return flask.flask.redirect('/cuentas')
+
+# =========================
+# RECIBO
+# =========================
+
+@app.route('/recibo/<tipo>/<cantidad>')
+def recibo(tipo, cantidad):
+
+    fecha = datetime.now().strftime(
+        '%d/%m/%Y %H:%M:%S'
+    )
+
+    return flask.flask.render_template(
+        'recibo.html',
+        tipo=tipo,
+        cantidad=cantidad,
+        fecha=fecha
+    )
 
 # =========================
 # EJECUTAR SERVIDOR

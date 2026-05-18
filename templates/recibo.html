@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <title>Recibo Bancario</title>
+
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="recibo-container">
+
+    <div class="recibo-header">
+
+        <h1>
+            BANK INVENTORY
+        </h1>
+
+        <p>
+            Recibo Bancario Oficial
+        </p>
+
+    </div>
+
+    <div class="recibo-body">
+
+        <div class="recibo-item">
+
+            <span>Tipo de operación:</span>
+
+            <strong>
+                {{ tipo }}
+            </strong>
+
+        </div>
+
+        <div class="recibo-item">
+
+            <span>Cantidad:</span>
+
+            <strong>
+                ${{ cantidad }}
+            </strong>
+
+        </div>
+
+        <div class="recibo-item">
+
+            <span>Fecha:</span>
+
+            <strong>
+                {{ fecha }}
+            </strong>
+
+        </div>
+
+    </div>
+
+    <div class="recibo-footer">
+
+        <h3>
+            Operación completada correctamente
+        </h3>
+
+        <a href="/dashboard">
+
+            <button>
+                Volver al Dashboard
+            </button>
+
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

@@ -5,6 +5,9 @@
 
     <meta charset="UTF-8">
 
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
     <title>Usuarios</title>
 
     <link rel="stylesheet"
@@ -16,17 +19,41 @@
 
 <header>
 
-    <h1>Usuarios</h1>
+    <h1>Usuarios Bancarios</h1>
 
     <nav>
-        <a href="/">Inicio</a>
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/inventario">
+            Inventario
+        </a>
+
+        <a href="/cuentas">
+            Cuentas
+        </a>
+
+        <a href="/movimientos">
+            Movimientos
+        </a>
+
+        <a href="/logout">
+            Cerrar sesión
+        </a>
+
     </nav>
 
 </header>
 
+<!-- FORMULARIO -->
+
 <section class="form-section">
 
-    <h2>Agregar Usuario</h2>
+    <h2>
+        Agregar Usuario
+    </h2>
 
     <form action="/agregar" method="POST">
 
@@ -50,39 +77,40 @@
 
 </section>
 
+<!-- USUARIOS -->
+
 <section class="usuarios">
 
-    <h2>Lista de Usuarios</h2>
+    <h2>
+        Usuarios Registrados
+    </h2>
 
     {% for usuario in usuarios %}
 
-    <div class="usuario-card">
+        <div class="usuario-card">
 
-        <h3>{{ usuario[1] }}</h3>
+            <h3>
+                {{ usuario[1] }}
+            </h3>
 
-        <p>{{ usuario[2] }}</p>
+            <p>
+                {{ usuario[2] }}
+            </p>
 
-        <a href="/eliminar/{{ usuario[0] }}">
+            <a href="/eliminar_usuario/{{ usuario[0] }}">
 
-            <button>
-                Eliminar
-            </button>
+                <button>
+                    Eliminar
+                </button>
 
-        </a>
+            </a>
 
-        <a href="/editar/{{ usuario[0] }}">
-
-    <button>
-        Editar
-    </button>
-
-</a>
-
-    </div>
+        </div>
 
     {% endfor %}
 
 </section>
 
 </body>
+
 </html>

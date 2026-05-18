@@ -5,7 +5,10 @@
 
     <meta charset="UTF-8">
 
-    <title>Inventario</title>
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <title>Inventario Bancario</title>
 
     <link rel="stylesheet"
     href="{{ url_for('static', filename='style.css') }}">
@@ -16,12 +19,26 @@
 
 <header>
 
-    <h1>Inventario Bancario</h1>
+    <h1>
+        Inventario Bancario
+    </h1>
 
     <nav>
 
         <a href="/dashboard">
             Dashboard
+        </a>
+
+        <a href="/usuarios">
+            Usuarios
+        </a>
+
+        <a href="/cuentas">
+            Cuentas
+        </a>
+
+        <a href="/movimientos">
+            Movimientos
         </a>
 
         <a href="/logout">
@@ -31,6 +48,8 @@
     </nav>
 
 </header>
+
+<!-- AGREGAR PRODUCTO -->
 
 <section class="form-section">
 
@@ -47,22 +66,20 @@
         required>
 
         <input
-type="number"
-name="cantidad"
-placeholder="Cantidad"
-min="1"
-required>
-
-
-        </select>
+        type="number"
+        name="cantidad"
+        placeholder="Cantidad"
+        required>
 
         <button type="submit">
-            Guardar
+            Guardar Producto
         </button>
 
     </form>
 
 </section>
+
+<!-- PRODUCTOS -->
 
 <section class="usuarios">
 
@@ -82,6 +99,14 @@ required>
                 Cantidad:
                 {{ producto[2] }}
             </p>
+
+            <a href="/eliminar_producto/{{ producto[0] }}">
+
+                <button>
+                    Eliminar
+                </button>
+
+            </a>
 
         </div>
 

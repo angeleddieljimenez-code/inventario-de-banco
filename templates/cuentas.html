@@ -5,7 +5,12 @@
 
     <meta charset="UTF-8">
 
-    <title>Cuentas Bancarias</title>
+    <meta name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Cuentas Bancarias
+    </title>
 
     <link rel="stylesheet"
     href="{{ url_for('static', filename='style.css') }}">
@@ -16,13 +21,43 @@
 
 <header>
 
-    <h1>Cuentas Bancarias</h1>
+    <h1>
+        Cuentas Bancarias
+    </h1>
+
+    <nav>
+
+        <a href="/dashboard">
+            Dashboard
+        </a>
+
+        <a href="/usuarios">
+            Usuarios
+        </a>
+
+        <a href="/inventario">
+            Inventario
+        </a>
+
+        <a href="/movimientos">
+            Movimientos
+        </a>
+
+        <a href="/logout">
+            Cerrar sesión
+        </a>
+
+    </nav>
 
 </header>
 
+<!-- CREAR CUENTA -->
+
 <section class="form-section">
 
-    <h2>Crear Cuenta</h2>
+    <h2>
+        Crear Cuenta
+    </h2>
 
     <form action="/crear_cuenta" method="POST">
 
@@ -46,19 +81,166 @@
 
 </section>
 
+<!-- BUSCADOR -->
+
+<section class="form-section">
+
+    <h2>
+        Buscar Cuenta
+    </h2>
+
+    <form action="/cuentas" method="GET">
+
+        <input
+        type="text"
+        name="buscar"
+        placeholder="Buscar cliente">
+
+        <button type="submit">
+            Buscar
+        </button>
+
+    </form>
+
+</section>
+
+<!-- TRANSFERENCIAS -->
+
+<section class="form-section">
+
+    <h2>
+        Transferir Dinero
+    </h2>
+
+    <form action="/transferir" method="POST">
+
+        <input
+        type="number"
+        name="origen"
+        placeholder="ID Origen"
+        required>
+
+        <input
+        type="number"
+        name="destino"
+        placeholder="ID Destino"
+        required>
+
+        <input
+        type="number"
+        name="cantidad"
+        placeholder="Cantidad"
+        required>
+
+        <button type="submit">
+            Transferir
+        </button>
+
+    </form>
+
+</section>
+
+<!-- TARJETAS -->
+
 <section class="usuarios">
 
-    <h2>Cuentas Registradas</h2>
+    <h2>
+        Cuentas Registradas
+    </h2>
 
     {% for cuenta in cuentas %}
 
-        <div class="usuario-card">
+    <div class="tarjeta-banco">
 
-            <h3>{{ cuenta[1] }}</h3>
+        <div class="tarjeta-top">
 
-            <p>Saldo: ${{ cuenta[2] }}</p>
+            <h3>
+                BANK INVENTORY
+            </h3>
+
+            <span>
+                VISA
+            </span>
 
         </div>
+
+        <div class="chip"></div>
+
+        <div class="numero-tarjeta">
+
+            {{ cuenta[3] }}
+
+        </div>
+
+        <div class="tarjeta-info">
+
+            <div>
+
+                <p>
+                    Cliente
+                </p>
+
+                <strong>
+                    {{ cuenta[1] }}
+                </strong>
+
+            </div>
+
+            <div>
+
+                <p>
+                    Saldo
+                </p>
+
+                <strong>
+                    ${{ cuenta[2] }}
+                </strong>
+
+            </div>
+
+        </div>
+
+        <div class="tarjeta-bottom">
+
+            <div>
+
+                <p>
+                    Vence
+                </p>
+
+                <strong>
+                    12/30
+                </strong>
+
+            </div>
+
+            <div>
+
+                <p>
+                    CVV
+                </p>
+
+                <strong>
+                    123
+                </strong>
+
+            </div>
+
+        </div>
+
+        <div class="acciones">
+
+            <a href="/eliminar_cuenta/{{ cuenta[0] }}">
+
+                <button>
+                    Eliminar Cuenta
+                </button>
+
+            </a>
+
+        </div>
+
+    </div>
 
     {% endfor %}
 
