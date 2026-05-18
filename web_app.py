@@ -103,10 +103,10 @@ def inicio():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
-    if flask.flask.request.method == 'POST':
+    if Flask.flask.request.method == 'POST':
 
-        usuario = flask.flask.request.form['usuario']
-        password = flask.flask.request.form['password']
+        usuario = Flask.flask.request.form['usuario']
+        password = Flask.flask.request.form['password']
 
         conexion = sqlite3.connect('database.db')
         cursor = conexion.cursor()
@@ -125,11 +125,11 @@ def login():
 
         if admin:
 
-            flask.flask.session['usuario'] = usuario
+            Flask.flask.session['usuario'] = usuario
 
-            return flask.Flask.flask.redirect('/dashboard')
+            return Flask.Flask.flask.redirect('/dashboard')
 
-    return flask.flask.render_template('login.html')
+    return Flask.flask.render_template('login.html')
 
 # =========================
 # LOGOUT
@@ -138,9 +138,9 @@ def login():
 @app.route('/logout')
 def logout():
 
-    flask.flask.session.pop('usuario', None)
+    Flask.flask.session.pop('usuario', None)
 
-    return flask.flask.redirect('/login')
+    return Flask.flask.redirect('/login')
 
 # =========================
 # DASHBOARD
@@ -216,7 +216,7 @@ def usuarios():
 
     conexion.close()
 
-    return flask.flask.render_template(
+    return Flask.flask.render_template(
         'usuarios.html',
         usuarios=usuarios
     )
@@ -239,7 +239,7 @@ def eliminar_usuario(id):
     conexion.commit()
     conexion.close()
 
-    return flask.flask.redirect('/usuarios')
+    return Flask.flask.redirect('/usuarios')
 
 # =========================
 # AGREGAR USUARIO
@@ -248,8 +248,8 @@ def eliminar_usuario(id):
 @app.route('/agregar', methods=['POST'])
 def agregar():
 
-    nombre = flask.flask.request.form['nombre']
-    correo = flask.flask.request.form['correo']
+    nombre = Flask.flask.request.form['nombre']
+    correo = Flask.flask.request.form['correo']
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -262,7 +262,7 @@ def agregar():
     conexion.commit()
     conexion.close()
 
-    return flask.flask.redirect('/usuarios')
+    return Flask.flask.redirect('/usuarios')
 
 # =========================
 # INVENTARIO
@@ -282,7 +282,7 @@ def inventario():
 
     conexion.close()
 
-    return flask.flask.render_template(
+    return Flask.flask.render_template(
         'inventario.html',
         productos=productos
     )
@@ -294,8 +294,8 @@ def inventario():
 @app.route('/agregar_producto', methods=['POST'])
 def agregar_producto():
 
-    producto = flask.flask.request.form['producto']
-    cantidad = flask.flask.request.form['cantidad']
+    producto = Flask.flask.request.form['producto']
+    cantidad = Flask.flask.request.form['cantidad']
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -311,7 +311,7 @@ def agregar_producto():
     conexion.commit()
     conexion.close()
 
-    return flask.flask.redirect('/inventario')
+    return Flask.flask.redirect('/inventario')
 
 # =========================
 # ELIMINAR PRODUCTO
@@ -331,7 +331,7 @@ def eliminar_producto(id):
     conexion.commit()
     conexion.close()
 
-    return flask.flask.redirect('/inventario')
+    return Flask.flask.redirect('/inventario')
 
 # =========================
 # CUENTAS
@@ -340,7 +340,7 @@ def eliminar_producto(id):
 @app.route('/cuentas')
 def cuentas():
 
-    buscar = flask.flask.request.args.get('buscar')
+    buscar = Flask.flask.request.args.get('buscar')
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -365,7 +365,7 @@ def cuentas():
 
     conexion.close()
 
-    return flask.flask.render_template(
+    return Flask.flask.render_template(
         'cuentas.html',
         cuentas=cuentas
     )
@@ -377,8 +377,8 @@ def cuentas():
 @app.route('/crear_cuenta', methods=['POST'])
 def crear_cuenta():
 
-    cliente = flask.flask.request.form['cliente']
-    saldo = flask.flask.request.form['saldo']
+    cliente = Flask.flask.request.form['cliente']
+    saldo = Flask.flask.request.form['saldo']
 
     tarjeta = str(
         random.randint(
@@ -401,7 +401,7 @@ def crear_cuenta():
     conexion.commit()
     conexion.close()
 
-    return flask.flask.redirect('/cuentas')
+    return Flask.flask.redirect('/cuentas')
 
 # =========================
 # DEPOSITAR
@@ -410,7 +410,7 @@ def crear_cuenta():
 @app.route('/depositar/<int:id>', methods=['POST'])
 def depositar(id):
 
-    cantidad = float(flask.flask.request.form['cantidad'])
+    cantidad = float(Flask.flask.request.form['cantidad'])
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -446,7 +446,7 @@ def depositar(id):
     conexion.commit()
     conexion.close()
 
-    return flask.flask.redirect(
+    return Flask.flask.redirect(
     f'/recibo/Deposito/{cantidad}'
 )
 
@@ -457,7 +457,7 @@ def depositar(id):
 @app.route('/retirar/<int:id>', methods=['POST'])
 def retirar(id):
 
-    cantidad = float(flask.flask.request.form['cantidad'])
+    cantidad = float(Flask.flask.request.form['cantidad'])
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -496,7 +496,7 @@ def retirar(id):
 
     conexion.close()
 
-    return flask.flask.redirect(
+    return Flask.flask.redirect(
     f'/recibo/Retiro/{cantidad}'
 )
 # =========================
@@ -506,9 +506,9 @@ def retirar(id):
 @app.route('/transferir', methods=['POST'])
 def transferir():
 
-    origen = flask.flask.request.form['origen']
-    destino = flask.flask.request.form['destino']
-    cantidad = float(flask.flask.request.form['cantidad'])
+    origen = Flask.flask.request.form['origen']
+    destino = Flask.flask.request.form['destino']
+    cantidad = float(Flask.flask.request.form['cantidad'])
 
     conexion = sqlite3.connect('database.db')
     cursor = conexion.cursor()
@@ -573,7 +573,7 @@ def transferir():
 
     conexion.close()
 
-    return flask.flask.redirect(
+    return Flask.flask.redirect(
     f'/recibo/Transferencia/{cantidad}'
 )
 
@@ -621,7 +621,7 @@ def eliminar_cuenta(id):
     conexion.commit()
     conexion.close()
 
-    return flask.flask.redirect('/cuentas')
+    return Flask.flask.redirect('/cuentas')
 
 # =========================
 # RECIBO
@@ -634,7 +634,7 @@ def recibo(tipo, cantidad):
         '%d/%m/%Y %H:%M:%S'
     )
 
-    return flask.flask.render_template(
+    return Flask.flask.render_template(
         'recibo.html',
         tipo=tipo,
         cantidad=cantidad,
