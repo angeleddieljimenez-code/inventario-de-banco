@@ -642,6 +642,91 @@ def recibo(tipo, cantidad):
     )
 
 # =========================
+# ABONAR INVENTARIO
+# =========================
+
+@app.route('/abonar_producto/<int:id>', methods=['POST'])
+def abonar_producto(id):
+
+    cantidad = int(
+        request.form['cantidad']
+    )
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        '''
+        SELECT cantidad
+        FROM inventario
+        WHERE id = ?
+        ''',
+        (id,)
+    )
+
+    actual = cursor.fetchone()[0]
+
+    nueva = actual + cantidad
+
+    cursor.execute(
+        '''
+        UPDATE inventario
+        SET cantidad = ?
+        WHERE id = ?
+        ''',
+        (nueva, id)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return redirect('/inventario')
+
+# =========================
+# RESTAR INVENTARIO
+# =========================
+
+@app.route('/restar_producto/<int:id>', methods=['POST'])
+def restar_producto(id):
+
+    cantidad = int(
+        request.form['cantidad']
+    )
+
+    conexion = sqlite3.connect('database.db')
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        '''
+        SELECT cantidad
+        FROM inventario
+        WHERE id = ?
+        ''',
+        (id,)
+    )
+
+    actual = cursor.fetchone()[0]
+
+    nueva = actual - cantidad
+
+    if nueva < 0:
+        nueva = 0
+
+    cursor.execute(
+        '''
+        UPDATE inventario
+        SET cantidad = ?
+        WHERE id = ?
+        ''',
+        (nueva, id)
+    )
+
+    conexion.commit()
+    conexion.close()
+
+    return redirect('/inventario')
+
+# =========================
 # EJECUTAR SERVIDOR
 # =========================
 

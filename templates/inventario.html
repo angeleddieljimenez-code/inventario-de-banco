@@ -99,6 +99,41 @@
                 Cantidad:
                 {{ producto[2] }}
             </p>
+            <!-- ABONAR -->
+
+<form
+action="/abonar_producto/{{ producto[0] }}"
+method="POST">
+
+    <input
+    type="number"
+    name="cantidad"
+    placeholder="Abonar"
+    required>
+
+    <button type="submit">
+        +
+    </button>
+
+</form>
+
+<!-- RESTAR -->
+
+<form
+action="/restar_producto/{{ producto[0] }}"
+method="POST">
+
+    <input
+    type="number"
+    name="cantidad"
+    placeholder="Restar"
+    required>
+
+    <button type="submit">
+        -
+    </button>
+
+</form>
 
             <a href="/eliminar_producto/{{ producto[0] }}">
 
